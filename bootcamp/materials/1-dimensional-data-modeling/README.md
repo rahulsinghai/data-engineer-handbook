@@ -37,6 +37,27 @@ For detailed instructions and more information, please refer to the step-by-step
 
 ## 2️⃣ **Run Postgres**
 
+```shell
+# In Powersehll Admin mode:
+wsl --update --web-download
+
+# Install Docker Desktop
+# Run Docker Desktop
+
+# In Terminal:
+cd bootcamp\materials\1-dimensional-data-modeling
+cp example.env .env
+docker compose up -d
+docker ps -a
+docker exec -it <container_name_or_id> bash
+pg_restore -U $POSTGRES_USER -d $POSTGRES_DB /docker-entrypoint-initdb.d/data.dump
+Ctrl+d
+
+Open pgAdmin 4   at http://localhost:5050/browser/
+
+docker compose down
+```
+
 There are two methods to get Postgres running locally.
 
 ### 💻 **Option 1: Run on local machine**
@@ -77,7 +98,8 @@ There are two methods to get Postgres running locally.
         docker compose up -d
         ```
         
-- A folder named **`postgres-data`** will be created in the root of the repo. The data backing your Postgres instance will be saved here.
+- A folder named **`postgres-data`** will be created in the root of the repo (in Linux) or in \\wsl.localhost\docker-desktop\mnt\docker-desktop-disk\data\docker\volumes (in Windows).
+  The data backing your Postgres instance will be saved here.
 - You can check that your Docker Compose stack is running by either:
     - Going into Docker Desktop: you should see an entry there with a drop-down for each of the containers running in your Docker Compose stack.
     - Running **`docker ps -a`** and looking for the containers with the name **`postgres`**.
