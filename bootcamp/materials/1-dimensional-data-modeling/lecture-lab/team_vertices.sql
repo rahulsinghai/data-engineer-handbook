@@ -3,7 +3,7 @@ WITH teams_deduped AS (
     FROM teams
 )
 SELECT
-       team_id AS identifier,
+    team_id AS identifier,
     'team'::vertex_type AS type,
     json_build_object(
         'abbreviation', abbreviation,
@@ -11,6 +11,6 @@ SELECT
         'city', city,
         'arena', arena,
         'year_founded', yearfounded
-        )
+    )
 FROM teams_deduped
-WHERE row_num = 1
+WHERE row_num = 1;
