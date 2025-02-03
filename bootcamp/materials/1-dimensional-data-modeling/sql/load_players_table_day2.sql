@@ -1,3 +1,13 @@
+CREATE TYPE season_stats AS (
+    season INTEGER,
+    gp INTEGER,
+    pts REAL,
+    reb REAL,
+    ast REAL
+);
+
+CREATE TYPE scoring_class AS ENUM('star', 'good', 'average', 'bad');
+
 INSERT INTO players
 WITH years AS (
     SELECT *
@@ -13,7 +23,31 @@ WITH years AS (
     FROM p
     JOIN years y
         ON p.first_season <= y.season
-), windowed AS (
+)
+SELECT
+    pas.player_name,
+    pas.season,
+    ARRAY_REMOVE(
+            ARRAY_AGG(
+                    CASE
+                        WHEN ps.season IS NOT NULL
+                            THEN ROW(
+                            ps.season,
+                            ps.gp,
+                            ps.pts,
+                            ps.reb,
+                            ps.ast
+                            )::season_stats
+                        END)
+                    OVER (PARTITION BY pas.player_name ORDER BY COALESCE(pas.season, ps.season)),
+            NULL
+    ) AS seasons
+FROM players_and_seasons pas
+         LEFT JOIN player_seasons ps
+                   ON pas.player_name = ps.player_name
+                       AND pas.season = ps.season
+ORDER BY pas.player_name, pas.season
+   , windowed AS (
     SELECT
         pas.player_name,
         pas.season,

@@ -225,7 +225,7 @@ CREATE TABLE IF NOT EXISTS public.players (
     PRIMARY_KEY(player_name, current_season)
 );
    
-ALTER TABLE IF EXISTS public.player_seasons
+ALTER TABLE IF EXISTS public.players
     OWNER to postgres;
 ```
 
@@ -383,32 +383,16 @@ ALTER TABLE IF EXISTS public.player_seasons
             ELSE y.season_stats
        END AS season_stats,
        COALESCE(t.season, y.current_season + 1) AS current_season,
-       AS is_active
+       (seasons[CARDINALITY(seasons)]::season_stats).season = season AS is_active
    FROM today t FULL OUTER JOIN yesterday y
        ON t.player_name = y.player_name;
    ```
 
-6. Then we start inserting this data into players table:
+6. Then we start inserting this data into players table: [](./sql/load_players_table_day2.sql)
 
    ```sql
    INSERT INTO players
-   WITH years AS (
-       SELECT *
-       FROM generate_series(1996, 2025) as season
-   ),
-   p AS (
-       SELECT player_name, MIN(season) as season
-   ),
-   players_and_seasons AS (
-       SELECT *
-       FROM p
-           JOIN years y ON p.first_season <= y.season
-   ),
-   windowed AS (
-       SELECT ps.player_name,
-           ps.season,
-           array_remove(ARRAY_AGG(CASE
-                                      WHEN p1.season IS NOT NULL THEN
+   ...
 
    SELECT * from players;
 
@@ -513,7 +497,8 @@ ALTER TABLE IF EXISTS public.player_seasons
            WHEN t.season IS NOT NULL THEN 0
             ELSE y.years_since_last_season + 1
        END AS years_since_last_season,
-       COALESCE(t.season, y.current_season + 1) AS current_season
+       COALESCE(t.season, y.current_season + 1) AS current_season,
+       t.season IS NOT NULL AS is_active
    FROM today t FULL OUTER JOIN yesterday y
        ON t.player_name = y.player_name;
    ```

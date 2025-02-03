@@ -49,7 +49,9 @@ cd bootcamp\materials\1-dimensional-data-modeling
 cp example.env .env
 docker compose up -d
 docker ps -a
-docker exec -it <container_name_or_id> bash
+docker exec -it <container_name_or_id_of_postgres> bash
+# export POSTGRES_USER=postgres POSTGRES_DB=postgres
+psql -v ON_ERROR_STOP=1 -U $POSTGRES_USER --dbname $POSTGRES_DB;
 pg_restore -U $POSTGRES_USER -d $POSTGRES_DB /docker-entrypoint-initdb.d/data.dump
 Ctrl+d
 
@@ -103,18 +105,32 @@ There are two methods to get Postgres running locally.
 - You can check that your Docker Compose stack is running by either:
     - Going into Docker Desktop: you should see an entry there with a drop-down for each of the containers running in your Docker Compose stack.
     - Running **`docker ps -a`** and looking for the containers with the name **`postgres`**.
-- If you navigate to **`http://localhost:5050`** you will be able to see the PGAdmin instance up and running and should be able to connect to the following server as details shown:
+- If you navigate to **`http://localhost:5050`** you will be able to see the PGAdmin instance up and running and should be able to connect to the following server with the default credentials: `postgres@postgres.com/postgres` as details shown:
     
     <img src=".attachments/pgadmin-server.png" style="width:500px;"/> 
+    ![Image showing the setup for PGAdmin](.attachments/pgadmin-server.png)
+  
+  Where:
+    - Host name: localhost (IntelliJ) OR host.docker.internal (pgAdmin) (Or container name i.e my-postgres-container)
+    - Port: 5432
+    - Username: postgres
+    - Password: postgres
 
+- When you're finished with your Postgres instance, you can stop the Docker Compose containers with:
 
-- When you're finished with your Postgres instance(required in week 1 & 2 & 4), you can stop the Docker Compose containers with:
+    ```bash
+    make down
+    ```
+    
+    Or if you're on Windows:
     
     ```bash
+    docker compose down -v
+    # OR
     docker compose stop
     ```
 
-## :three: **Connect to Postgres in Local Database Client**
+## :three: **Connect to Postgres in Database Client**
 
 - Some options for interacting with your Postgres instance:
     - DataGrip - JetBrains; 30-day free trial or paid version
@@ -137,6 +153,21 @@ There are two methods to get Postgres running locally.
 
 > Refer to the instructions below to resolve the issue when the data dump fails to load tables, displaying the message `PostgreSQL Database directory appears to contain a database; Skipping initialization.`
 ## **🚨 Tables not loading!? 🚨**
+- If you're seeing errors about `error: invalid command \N`, you should use `pg_restore` to load `data.dump`.
+```bash
+  pg_restore -U $POSTGRES_USER -d $POSTGRES_DB data.dump
+```
+- If you are on Windows and used **`docker compose up`**, table creation and data load will not take place with container creation. Once you have docker container up and verified that you are able to connect to empty postgres database with your own choice of client, follow the following steps:
+1. On Docker desktop, connect to my-postgres-container terminal.
+2. Run:
+    ```bash
+    psql \
+        -v ON_ERROR_STOP=1 \
+        --username $POSTGRES_USER \
+        --dbname $POSTGRES_DB \
+        < /docker-entrypoint-initdb.d/data.dump
+    ```
+    - → This will run the file `data.dump` from inside your docker container.
 
 - If the tables don't come with the loaded data, follow these steps with manual local installation of Postgres:
 
