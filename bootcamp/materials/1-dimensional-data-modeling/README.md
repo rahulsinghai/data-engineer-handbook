@@ -105,16 +105,15 @@ There are two methods to get Postgres running locally.
 - You can check that your Docker Compose stack is running by either:
     - Going into Docker Desktop: you should see an entry there with a drop-down for each of the containers running in your Docker Compose stack.
     - Running **`docker ps -a`** and looking for the containers with the name **`postgres`**.
-- If you navigate to **`http://localhost:5050`** you will be able to see the PGAdmin instance up and running and should be able to connect to the following server with the default credentials: `postgres@postgres.com/postgres` as details shown:
+- If you navigate to **<http://localhost:5050>** you will be able to see the PGAdmin instance up and running and should be able to connect to the following server as details shown:
     
-    <img src=".attachments/pgadmin-server.png" style="width:500px;"/> 
-    ![Image showing the setup for PGAdmin](.attachments/pgadmin-server.png)
+    <img src=".attachments/pgadmin-server.png" alt="Image showing the setup for PGAdmin" style="width:500px;"/>
   
   Where:
-    - Host name: localhost (IntelliJ) OR host.docker.internal (pgAdmin) (Or container name i.e my-postgres-container)
-    - Port: 5432
-    - Username: postgres
-    - Password: postgres
+    - Host name: `localhost` (IntelliJ) OR `host.docker.internal` (pgAdmin) (Or container name i.e `my-postgres-container`)
+    - Port: `5432`
+    - Username: `postgres` OR `postgres@postgres.com/postgres`
+    - Password: `postgres`
 
 - When you're finished with your Postgres instance, you can stop the Docker Compose containers with:
 
@@ -133,11 +132,11 @@ There are two methods to get Postgres running locally.
 ## :three: **Connect to Postgres in Database Client**
 
 - Some options for interacting with your Postgres instance:
-    - DataGrip - JetBrains; 30-day free trial or paid version
+    - DataGrip - JetBrains; 30-day free trial or paid version.
     - VSCode built-in extension (there are a few of these).
     - PGAdmin.
     - Postbird.
-    - Dbeaver
+    - Dbeaver.
 - Using your client of choice, follow the instructions to establish a new PostgreSQL connection.
     - The default username is **`postgres`** and corresponds to **`$POSTGRES_USER`** in your **`.env`**.
     - The default password is **`postgres`** and corresponds to **`$POSTGRES_PASSWORD`** in your **`.env`**.
