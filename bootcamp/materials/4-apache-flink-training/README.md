@@ -113,6 +113,169 @@
 
 ## Lecture 2 Slides
 
+### Sample streaming pipeline:
+
+<img src=".attachments/streaming-example-scenario-1.png" alt="Streaming example scenario 1" style="width:700px;"/>
+
+- HTTP Interceptor is our **Data Generation** layer.
+- Kafka is our **Data Ingestion** layer.
+- Flink is our **Real-time Data Processing** layer.
+- Postgres is our **Data Storage** layer.
+
+### Future version (data product) of the pipeline:
+
+A **closed loop** system where the data is used to make decisions and then fed back into the system.
+
+<img src=".attachments/streaming-example-data-product.png" alt="Streaming example as a Data Product" style="width:700px;"/>
+
+### Data architectures
+
+<img src=".attachments/kappa_take2.webp" alt="Lambda vs Kappa architecture" style="width:500px;"/>
+
+
+#### Lambda Architecture
+
+<img src=".attachments/lambda-architecture.png" alt="Lambda architecture" style="width:500px;"/>
+<img src=".attachments/lamda-architecture-example.png" alt="Lambda architecture example" style="width:700px;"/>
+
+- Lambda architecture is designed to handle both batch and real-time data processing in a single system.
+- You have both batch pipeline and a streaming pipeline, that write the same data to the same sink.
+  - Batch pipeline is a backup for a failure/incorrectness in streaming pipeline
+- Optimizes for latency and correctness
+- Eats a bit of pain in complexity
+- **Three layers**: batch, speed, and serving
+  - Batch layer processes large volumes of historical data. Historical, slow, correct, complex, and expensive, but can be used to fix data quality issues.
+    - Hadoop, Spark, Hive, Impala
+    - Data is processed in batch and stored in a distributed file system and/or data warehouse
+  - Speed layer handles real-time data streams. Real-time, fast, approximate, simple, and cheap
+    - Kafka, Flink
+    - Data is processed in real-time and stored in a key-value store
+  - Serving layer combines results from both layers
+- Pros:
+  - Easier to insert data quality checks on the batch side
+  - Handles both real-time and batch processing efficiently
+  - Highly scalable and fault-tolerant
+  - Ensures data integrity through the batch layer
+- Cons:
+  - Increased complexity due to maintaining two separate processing systems
+  - Duplication of business logic across layers: Double code base
+  - Potential latency in the batch layer
+- Example
+  - A large e-commerce platform using **Hadoop** for batch processing of historical sales data and **Apache Storm** for real-time processing of current user activity.
+- Netflix uses this architecture
+
+#### Kappa Architecture
+
+**Streaming first**: You don't need both batch and streaming pipelines. You can use just a streaming pipeline.
+It simplifies Lambda by using a single real-time processing pipeline for all data.
+- Features
+  - Single processing pipeline for both real-time and batch data
+  - Uses a stream processing system as the core engine
+  - Reprocessing is done by replaying the data through the same pipeline
+- Pros
+  - Least complex
+  - Great latency wins
+  - Simplified system with a single code base
+  - Reduced complexity and maintenance overhead
+  - Faster and more consistent results
+- Cons
+  - Can be painful when you need to read a lot of history
+  - You need to read things sequentially
+  - Back-filling a lot of historical data can be painful
+  - May require more resources and tuning for reliability
+  - Can be challenging for complex batch processing tasks
+  - Limited by the capabilities of the chosen stream processing framework
+- Example:
+  - A social media analytics platform using **Apache Kafka** for data ingestion and **Apache Flink** for all data processing, both real-time and historical.
+  - Uber uses this architecture
+- Delta Lake, Iceberg, Hudi are making this architecture much more viable!
+- Flink pipeline with a single code base can run either in batch or streaming mode.
+  - Flink can dump data to Iceberg with partitions, and then you can back-fill data by 1 day at a time.
+  - Iceberg allows appending data to a partition, instead of overwriting it (like in Hive).
+
+### Flink UDFs
+
+- User Defined Functions (UDFs) are functions that can be defined by the user to perform operations on the data.
+- Flink provides a rich set of built-in functions that can be used to perform operations on the data.
+- UDFs can be used to perform complex operations on the data that are not supported by the built-in functions in Flink, such as **custom** Transforming, Filtering, Aggregating, Joining the data, etc.
+- UDFs can be used in the operations like Map, FlatMap, Filter, Reduce, Aggregate, Join, CoGroup, Cross, etc.
+- Flink supports UDFs in Java, Scala, and Python.
+  - Flink provides a set of interfaces that can be implemented to create UDFs in Java and Scala.
+- UDFs generally speaking won't perform as well as built-in functions
+- Python UDFs are going to be even less performant since Flink isn't native Python!
+  - When you use Python UDFs, Flink will serialize the data to Python using Apache Arrow, run the UDF in a separate Python process, and then serialize it (using Arrow) and send it back to Java.
+
+### Flink Windows
+
+#### Data-driven Windows
+
+##### Count-driven Windows
+
+- Window opens as soon 1st event is received
+- Window stays open until N number of events occur
+- **Funnel analytics**: Useful for funnels that have a predictable number of events.
+  - Example: User registration funnel
+    - User visits the site
+    - User signs up
+    - User confirms email
+    - User makes a purchase
+- Can specify a timeout since not everybody will finish the funnel: 1000 events or 1 hour, whichever comes first
+
+#### Time-driven Windows
+
+##### Tumbling Windows (no overlap)
+
+<img src=".attachments/tumbling-windows.png" alt="Tumbling windows" style="width:500px;"/>
+
+- Fixed-size, non-overlapping windows
+- Similar to hourly data in batch processing
+- Greate for chunking/aggregating data over fixed time intervals
+- Window starts at a fixed point in time and ends after a fixed duration
+- Example:
+  - 1-hour tumbling window
+  - Total number of events in the last hour
+  - Average temperature in the last 5 minutes
+  - Total number of events in the last 5 minutes
+
+##### Sliding Windows (with overlap)
+
+<img src=".attachments/sliding-windows.png" alt="Sliding windows" style="width:500px;"/>
+
+- Fixed-size, overlapping windows
+- We are not trying to aggregate all these windows, but trying to find one with max events, etc.
+- Captures more windows
+- Good for finding "peak-use" windows
+- Good at handling "across midnight" exceptions in batch
+  - Edge cases around 00:00 UTC when we want daily data
+- Niche, specific use case
+
+##### Session Windows (punctuated by a gap of inactivity)
+
+<img src=".attachments/session-windows.png" alt="Session windows" style="width:500px;"/>
+
+- User specific windows: It starts when the user starts interacting with the system and ends when the user stops interacting with the system for a gap of time.
+- Variable length
+- Based on activity
+- Used to determine "normal" user behavior
+
+### Allowed Lateness vs Watermarking
+
+Out of order or late arriving events
+- Watermarks (smaller than the window) are used to handle out-of-order events
+  - Flink uses watermarks to track the progress of event time
+  - A watermark is a declaration that by that point in the stream, all events up to a certain timestamp should have arrived.
+  - Once a watermark reaches an operator, the operator can advance its internal event time clock to the value of the watermark.
+  - Watermarks are used to determine when a computational window can be closed and executed
+  - Helps define ordering of events that arrive out-of-order
+  - Handles idleness too
+- Allowed Lateness (larger than the window) is used to handle late arriving events
+  - Usually set to O: By default, late elements are dropped when the watermark is past the end of the window.
+  - Allows for reprocessing of events that fall within the late window
+  - Elements that arrive after the watermark has passed the end of the window but before it passes the end of the window plus the allowed lateness, are still added to the window.
+  - Depending on the trigger used, a late but not dropped element may cause the window to fire again.
+  - Flink keeps the state of windows until their allowed lateness expires. Once this happens, Flink removes the window and deletes its state
+  - CAUTION: WILL GENERATE/MERGE WITH OTHER RECORDS
+
 ## Apache Flink Training
 
 ### :pushpin: Getting started 
