@@ -61,7 +61,7 @@ Mismatching needs = less business value!!!!
 
 ## OLTP and OLAP IS A CONTINUUM
 
-![OLTP and OLAP IS A CONTINUUM](images/OLTPandOLAPisAContinuum.png)
+<img src=".attachments/OLTPandOLAPisAContinuum.png" alt="OLTP and OLAP IS A CONTINUUM" style="width:500px;"/>
 
 - Production Database snapshots: Host, guest, listings, pricing, availability, etc. All dimensions modelled in a transactional way.
 - Master Data: Take all the dimensions from Production database and merge them to make easy to understand price & availability. One table from 40 tables. Still normalised & deduped.
@@ -70,7 +70,7 @@ Mismatching needs = less business value!!!!
 
 ## Cumulative Table Design
 
-![Cumulative Table Design](images/CumulativeTableDesign.png)
+<img src=".attachments/CumulativeTableDesign.png" alt="Cumulative Table Design" style="width:500px;"/>
 
 Master data should still hold on to an entity with its complete history.
 - Core components
@@ -155,17 +155,17 @@ If you explode it out and need to join other dimensions, Spark shuffle will ruin
 - Shuffle can ruin this. BE CAREFUL!
   - Shuffle happens in distributed environments when you do JOIN and GROUP BY
 
-![](./images/RunLengthEncoding_Before.png)
+<img src=".attachments/RunLengthEncoding_Before.png" alt="" style="width:500px;"/>
 
 After run-length encoding compression, it will look like:
 
-![](./images/RunLengthEncoding_After.png)
+<img src=".attachments/RunLengthEncoding_After.png" alt="" style="width:500px;"/>
 
 ## Spark Shuffle
 
 After a join, Spark may mix up the ordering of the rows and ruin your compression:
 
-![Spark Shuffle](images/SparkShuffle.png)
+<img src=".attachments/SparkShuffle.png" alt="Spark Shuffle" style="width:500px;"/>
 
 ### Solutions
 1. Resort your data after JOIN. Unpreferred.

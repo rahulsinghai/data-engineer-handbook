@@ -204,7 +204,7 @@ The slam dunk solution here was to log to the "app" field with each network requ
       AND e.event_type = l.event_type;
   ```
   
-![Hourly Deduping with Daily Microbatch](images/HourlyDedupingWithDailyMicrobatch.png)
+<img src="images/HourlyDedupingWithDailyMicrobatch.png" alt="Hourly Deduping with Daily Microbatch" style="width:500px;"/>
 
 ## Workshop - Day 01
 

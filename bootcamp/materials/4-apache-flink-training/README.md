@@ -1,6 +1,6 @@
 # Week 4 Apache Flink Streaming Pipelines
 
-## Slides
+## Lecture 1 Slides
 
 ### What's the difference between streaming, near real-time and real-time?
 
@@ -62,7 +62,7 @@
 
 ## The streaming -> batch continuum
 
-![img.png](img.png)
+<img src="img.png" alt="img.png" style="width:500px;"/>
 
 - Real time is a myth!|
     - You'll have seconds of latency just for the event generation -> Kafka -> Flink -> sink
@@ -111,11 +111,13 @@
       - Can be used to upgrade a job
       - Can be used to move a job to a different cluster
 
+## Lecture 2 Slides
+
 ## Apache Flink Training
 
-## :pushpin: Getting started 
+### :pushpin: Getting started 
 
-### :whale: Installations
+#### :whale: Installations
 
 To run this repo, the following components will need to be installed:
 
@@ -140,7 +142,7 @@ To run this repo, the following components will need to be installed:
         choco install make # uses Chocolatey, https://chocolatey.org/install
         ```
 
-### :computer: Local setup
+#### :computer: Local setup
 
 Clone/fork the repo and navigate to the root directory on your local computer.
 
@@ -149,7 +151,7 @@ git clone https://github.com/DataExpert-io/data-engineer-handbook.git
 cd bootcamp/materials/4-apache-flink-training
 ```
 
-### :dizzy: Configure credentials
+#### :dizzy: Configure credentials
 
 1. Copy `example.env` to `flink-env.env`.
 
@@ -172,7 +174,7 @@ cd bootcamp/materials/4-apache-flink-training
     &rarr; _You might also need to modify the configurations for the containerized postgreSQL instance such as `POSTGRES_USER` and `POSTGRES_PASSWORD`. Otherwise, you can leave the default username and password as `postgres`._
 
 
-## :boom: Running the pipeline
+### :boom: Running the pipeline
 
 1. Build the Docker image and deploy the services in the `docker-compose.yml` file, including the PostgreSQL database and Flink cluster. This will (should) also create the sink table, `processed_events`, where Flink will write the Kafka messages to.
 

@@ -58,7 +58,7 @@ At any instant/second it might be true that: "The number of active users = # of 
   - They chunk up the big data problem into manageable pieces
 - The little book of pipelines [example](https://github.com/EcZachly/little-book-of-pipelines)
 
-![Little Book Of Pipelines](images/LittleBookOfPipelines.PNG)
+<img src=".attachments/LittleBookOfPipelines.PNG" alt="Little Book Of Pipelines" style="width:500px;"/>
 
 - **n number of sources**: 
 - **Source function** map data to a shared schema
@@ -119,7 +119,7 @@ Because of this, you can do a very poor job at modeling the entities.
 
 Edge takes 2 vertexes and links them using an Edge_type
 
-![Graph Diagram](images/GraphDiagram.PNG)
+<img src=".attachments/GraphDiagram.PNG" alt="Graph Diagram" style="width:500px;"/>
 
 ## Workshop/Lab
 
